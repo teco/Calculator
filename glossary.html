@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Salesforce Data Cloud Glossary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 2rem;
+        }
+        .card {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .definition-item {
+            margin-bottom: 2rem;
+        }
+        .definition-item h3 {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 md:p-8">
+    <div class="container">
+        <div class="card">
+            <header class="flex flex-col md:flex-row justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold text-[#009EDB] text-center md:text-left mb-4 md:mb-0">Glossário de Atividades de Consumo no Data Cloud</h1>
+                <nav>
+                    <a href="calculator.html" class="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-6 py-2 rounded-full font-semibold shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out">Voltar para a Calculadora</a>
+                </nav>
+            </header>
+
+            <p class="text-gray-600 mb-8">Este documento fornece um glossário abrangente de atividades no Salesforce Data Cloud que geram cobrança. Cada entrada inclui uma descrição da atividade, exemplos práticos de seu uso e considerações importantes para gerenciar o consumo de créditos.</p>
+
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">Créditos de Serviço de Dados</h2>
+            <div class="space-y-6">
+                <div class="definition-item p-4 rounded-lg bg-[#f0f8ff]">
+                    <h3 class="text-lg">Data Service Credits</h3>
+                    <p class="text-sm text-gray-700">Data Service Credits são os créditos primários usados para a maioria das tarefas de processamento de dados, harmonização e análise dentro do ecossistema do Data Cloud.</p>
+                </div>
+                <div class="definition-item p-4 rounded-lg bg-[#f0f8ff]">
+                    <h3 class="text-lg">(External) Data Pipeline (Batch & Streaming)</h3>
+                    <p class="text-sm text-gray-700"><strong>Descrição:</strong> Refere-se à ingestão de dados de qualquer fonte não-Salesforce, como Amazon S3, data lakes externos ou via API. A ingestão de streaming é para dados quase em tempo real de fontes como o conector de Site/Aplicativo Móvel ou a API de ingestão.</p>
+                    <p class="text-sm text-gray-700"><strong>Exemplo Prático:</strong> Ingerir 1 milhão de registros de perfil de cliente de um sistema externo via um pipeline em lote consome 2.000 créditos. Ingerir 2 milhões de eventos de interação de carrinho via um pipeline de streaming consome 10.000 créditos.</p>
+                    <p class="text-sm text-gray-700"><strong>Consideração:</strong> O processamento em lote é significativamente mais barato que o streaming. Use streaming apenas se o seu caso de uso tiver uma forte justificativa para dados quase em tempo real.</p>
+                </div>
+                <div class="definition-item p-4 rounded-lg bg-[#f0f8ff]">
+                    <h3 class="text-lg">Internal Data Pipeline (Batch & Streaming)</h3>
+                    <p class="text-sm text-gray-700"><strong>Descrição:</strong> É para a ingestão de dados estruturados de conectores nativos da Salesforce como Salesforce CRM, Marketing Cloud e Commerce Cloud. Esta atividade está incluída e não consome créditos.</p>
+                    <p class="text-sm text-gray-700"><strong>Exemplo Prático:</strong> Ingerir 5 milhões de registros de contato do Sales Cloud para o Data Cloud consome 0 créditos.</p>
+                    <p class="text-sm text-gray-700"><strong>Consideração:</strong> Embora a ingestão seja gratuita, esses dados ainda consumirão créditos em todos os processos posteriores como transformações, unificação e insights calculados.</p>
+                </div>
+                <div class="definition-item p-4 rounded-lg bg-[#f0f8ff]">
+                    <h3 class="text-lg">Data Transforms (Batch & Streaming)</h3>
+                    <p class="text-sm text-gray-700"><strong>Descrição:</strong> Envolve a limpeza, padronização ou enriquecimento de dados usando a funcionalidade de transformação do Data Cloud. As transformações em lote são para processamento agendado, enquanto as transformações de transmissão operam em dados quase em tempo real.</p>
+                    <p class="text-sm text-gray-700"><strong>Exemplo Prático:</strong> Aplicar uma transformação em lote a 2 milhões de linhas para padronizar códigos de país custaria (2M/1M) * 400 = 800 créditos.</p>
+                    <p class="text-sm text-gray-700"><strong>Consideração:</strong> O uso de transformação em lote é calculado com base no número maior de linhas lidas ou escritas. Após a primeira execução, as transformações incrementais processam apenas linhas novas ou alteradas, o que pode reduzir significativamente o uso de créditos.</p>
+                </div>
+                <div class="definition-item p-4 rounded-lg bg-[#f0f8ff]">
+                    <h3 class="text-lg">Profile Unification (Batch)</h3>
+                    <p class="text-sm text-gray-700"><strong>Descrição:</strong> É o processo de correspondência e fusão de dados de diferentes fontes para criar um perfil de cliente unificado usando conjuntos de regras de resolução de identidade. É uma das atividades que mais consome créditos.</p>
+                    <p class="text-sm text-gray-700"><strong>Exemplo Prático:</strong> Unificar 1 milhão de perfis de origem pela primeira vez consome 100.000 créditos.</p>
+                    <p class="text-sm text-gray-700"><strong>Consideração:</strong> O consumo é baseado no número de perfis de origem processados, não no número final de perfis unificados. Um perfil de origem inclui um indivíduo e todos os seus registros relacionados (como pontos de contato) incluídos no conjunto de regras. Após a execução inicial, apenas perfis novos ou modificados são processados, mas a alteração de um conjunto de regras aciona uma atualização completa.</p>
+                </div>
+                <div class="definition-item p-4 rounded-lg bg-[#f0f8ff]">
+                    <h3 class="text-lg">Calculated Insights (Batch & Streaming)</h3>
+                    <p class="text-sm text-gray-700"><strong>Descrição:</strong> Envolve a criação de métricas e dimensões pré-calculadas em seus dados, como o Valor Vitalício (LTV) ou pontuações de engajamento do cliente.</p>
+                    <p class="text-sm text-gray-700"><strong>Exemplo Prático:</strong> Um Insight Calculado em lote que une um DMO com 2 milhões de registros e outro com 1 milhão de registros processará 3 milhões de registros no total, custando (3M/1M) * 15 = 45 créditos cada vez que for executado.</p>
+                    <p class="text-sm text-gray-700"><strong>Consideração:</strong> O uso é baseado no número de registros em todos os objetos subjacentes usados para criar o insight, não na saída final. Se este insight for usado em um segmento que atualiza diariamente, ele consumirá créditos diariamente.</p>
+                </div>
+                <div class="definition-item p-4 rounded-lg bg-[#f0f8ff]">
+                    <h3 class="text-lg">Data Queries</h3>
+                    <p class="text-sm text-gray-700"><strong>Descrição:</strong> Abrange qualquer consulta SQL executada contra dados do Data Cloud, como por meio do Editor de Consultas, APIs ou de ferramentas conectadas como Tableau ou CRM Analytics. É uma das operações mais baratas.</p>
+                    <p class="text-sm text-gray-700"><strong>Exemplo Prático:</strong> Executar uma consulta que processa 2,5 milhões de registros consumiria (2,5M/1M) * 2 = 5 créditos.</p>
+                    <p class="text-sm text-gray-700"><strong>Consideração:</strong> O número de registros processados depende da estrutura da consulta e do total de registros nos objetos sendo consultados. Otimize consultas com cláusulas WHERE para reduzir o custo.</p>
+                </div>
+                <div class="definition-item p-4 rounded-lg bg-[#f0f8ff]">
+                    <h3 class="text-lg">Unstructured Data Processed</h3>
+                    <p class="text-sm text-gray-700"><strong>Descrição:</strong> É para o processamento de arquivos como PDFs, áudio, vídeo ou documentos de texto, frequentemente para uso com IA e pesquisa vetorial.</p>
+                    <p class="text-sm text-gray-700"><strong>Exemplo Prático:</strong> Processar 100 documentos PDF de 1 MB cada seria calculado como 100 MB de uso, consumindo 100 * 60 = 6.000 créditos.</p>
+                    <p class="text-sm text-gray-700"><strong>Consideração:</strong> O uso é computado apenas uma vez tanto na “fragmentação” (dividir o arquivo em pedaços) quanto na “vetorização” (criar embeddings para pesquisa de IA).</p>
+                </div>
+                <div class="definition-item p-4 rounded-lg bg-[#f0f8ff]">
+                    <h3 class="text-lg">Data Federation ou Sharing Rows Accessed (Zero-Copy)</h3>
+                    <p class="text-sm text-gray-700"><strong>Descrição:</strong> Aplica-se ao usar conectores “Bring Your Own Lake” (BYOL) para acessar dados em plataformas externas como Snowflake ou Google BigQuery sem copiá-los para o Data Cloud.</p>
+                    <p class="text-sm text-gray-700"><strong>Exemplo Prático:</strong> Consultar uma visualização no Snowflake via federação de dados que retorna 5 milhões de registros consumiria (5M/1M) * 70 = 350 créditos.</p>
+                    <p class="text-sm text-gray-700"><strong>Consideração:</strong> Você é cobrado pelo número de linhas recuperadas da fonte cada vez que são acessadas. No entanto, compartilhar dados para a mesma nuvem e região (por exemplo, tanto o Data Cloud quanto o Snowflake estão em AWS us-east-1) não tem consumo de crédito.</p>
+                </div>
+                <div class="definition-item p-4 rounded-lg bg-[#f0f8ff]">
+                    <h3 class="text-lg">Sub-second Real-Time Events & API</h3>
+                    <p class="text-sm text-gray-700"><strong>Descrição:</strong> É para o processamento de eventos e chamadas de API na camada de sub-segundo, tipicamente usado para personalização em tempo real via os SDKs Web e Móvel. Este é um recurso de alto desempenho muito caro que requer uma licença adicional.</p>
+                    <p class="text-sm text-gray-700"><strong>Exemplo Prático:</strong> Ingerir 2 milhões de eventos de interação diariamente para personalização em tempo real consumiria aproximadamente 10.000 créditos por dia.</p>
+                    <p class="text-sm text-gray-700"><strong>Consideração:</strong> O uso é calculado como a soma de todos os eventos de perfil, eventos de engajamento, chamadas de API e ações de dados processados na camada de tempo real.</p>
+                </div>
+                <div class="definition-item p-4 rounded-lg bg-[#f0f8ff]">
+                    <h3 class="text-lg">Inferences</h3>
+                    <p class="text-sm text-gray-700"><strong>Descrição:</strong> Uma inferência é uma única saída de um modelo de IA preditivo, seja um modelo nativo do Einstein Studio ou um “Bring Your Own Model” (BYOM) externo.</p>
+                    <p class="text-sm text-gray-700"><strong>Exemplo Prático:</strong> Executar um trabalho de previsão em lote em 100.000 registros gera 100.000 inferências e consome (100k/1M) * 3.500 = 350 créditos. Uma única geração de texto de um LLM conta como uma inferência.</p>
+                    <p class="text-sm text-gray-700"><strong>Consideração:</strong> Não especificado no documento de origem.</p>
+                </div>
+            </div>
+            
+            <h2 class="text-2xl font-semibold mt-8 mb-4 text-gray-800">Créditos de Segmentação e Ativação</h2>
+            <div class="space-y-6">
+                 <div class="definition-item p-4 rounded-lg bg-[#f0f8ff]">
+                    <h3 class="text-lg">Segment Rows Processed</h3>
+                    <p class="text-sm text-gray-700"><strong>Descrição:</strong> Este é o custo de crédito para criar ou atualizar um segmento. Conta o número total de registros de todos os Objetos de Modelo de Dados (DMOs) usados nos critérios do segmento.</p>
+                    <p class="text-sm text-gray-700"><strong>Exemplo Prático:</strong> Você constrói um segmento de “Clientes de Alto Valor” filtrando um DMO Individual (5M de linhas) e um DMO de Pedidos relacionado (20M de linhas). O processo contará 25M de linhas, mesmo que o tamanho final do segmento seja de apenas 50.000 pessoas. Isso custaria (25M/1M) * 20 = 500 créditos por atualização.</p>
+                    <p class="text-sm text-gray-700"><strong>Consideração:</strong> Considere usar segmentos aninhados para reutilizar públicos existentes ou Insights Calculados para pré-filtrar dados, o que pode reduzir o número de linhas processadas durante a segmentação.</p>
+                </div>
+                <div class="definition-item p-4 rounded-lg bg-[#f0f8ff]">
+                    <h3 class="text-lg">Batch Activation</h3>
+                    <p class="text-sm text-gray-700"><strong>Descrição:</strong> Este é o custo de publicar um segmento para um alvo de ativação, como o Marketing Cloud Engagement ou um bucket S3.</p>
+                    <p class="text-sm text-gray-700"><strong>Exemplo Prático:</strong> Ativar um segmento com 2 milhões de membros consumiria (2M/1M) * 10 = 20 créditos.</p>
+                    <p class="text-sm text-gray-700"><strong>Consideração:</strong> Usar atualizações incrementais para ativação é uma estratégia chave para economizar créditos, pois garante que apenas registros novos ou atualizados sejam processados após a execução inicial.</p>
+                </div>
+                <div class="definition-item p-4 rounded-lg bg-[#f0f8ff]">
+                    <h3 class="text-lg">Activate DMO - Streaming</h3>
+                    <p class="text-sm text-gray-700"><strong>Descrição:</strong> É para ativações quase em tempo real, como enviar um evento para a API de Conversão do Meta assim que um usuário se qualifica para um segmento.</p>
+                    <p class="text-sm text-gray-700"><strong>Exemplo Prático:</strong> Uma ativação de transmissão processa 1 milhão de registros novos ou atualizados no DMO. Isso consumiria 1.600 créditos.</p>
+                    <p class="text-sm text-gray-700"><strong>Consideração:</strong> Se a ativação usar um grafo de dados, o número de registros processados é duplicado, o que também duplica o custo de crédito.</p>
+                </div>
+            </div>
+
+            <h2 class="text-2xl font-semibold mt-8 mb-4 text-gray-800">Outros Add Ons que geram cobrança (Custo Fixo)</h2>
+            <div class="space-y-6">
+                <div class="definition-item p-4 rounded-lg bg-[#f0f8ff]">
+                    <h3 class="text-lg">Data Storage</h3>
+                    <p class="text-sm text-gray-700"><strong>Descrição:</strong> As licenças do Data Cloud vêm com uma alocação de armazenamento base (por exemplo, 1 TB ou 5 TB). Se você exceder isso, deve comprar armazenamento adicional, tipicamente precificado por terabyte por ano.</p>
+                </div>
+                <div class="definition-item p-4 rounded-lg bg-[#f0f8ff]">
+                    <h3 class="text-lg">Data Spaces</h3>
+                    <p class="text-sm text-gray-700"><strong>Descrição:</strong> Sua organização vem com um espaço de dados padrão. Se você precisar particionar dados para diferentes marcas, regiões ou unidades de negócio, pode comprar Espaços de Dados adicionais por uma taxa anual.</p>
+                </div>
+                <div class="definition-item p-4 rounded-lg bg-[#f0f8ff]">
+                    <h3 class="text-lg">Ad Audiences</h3>
+                    <p class="text-sm text-gray-700"><strong>Descrição:</strong> Para ativar segmentos para plataformas de publicidade como Google Ads ou Meta, você deve comprar o complemento Ad Audiences, que é tipicamente precificado por público por ano.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
