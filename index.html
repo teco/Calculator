@@ -6,42 +6,239 @@
     <title>Salesforce Data Cloud Credit Calculator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-        }
-        .container {
-            max-width: 1200px;
-            margin: auto;
-            padding: 2rem;
-        }
-        .card {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .input-group label {
-            font-weight: 500;
-            color: #4b5563;
-        }
-        .input-group input, .input-group select {
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-            padding: 0.5rem;
-            width: 100%;
-        }
-        .table-header th {
-            font-weight: 600;
-            text-align: left;
-            padding: 0.75rem;
-            color: #1f2937;
-        }
-        .table-row td {
-            padding: 0.75rem;
-        }
-    </style>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, onSnapshot, addDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // This log level helps in debugging Firestore issues.
+        setLogLevel('debug');
+
+        const __app_id = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const __initial_auth_token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const inputTableBody = document.querySelector('#inputTable tbody');
+        const environmentSelect = document.getElementById('environment');
+        const growthRateInput = document.getElementById('growthRate');
+        const dataPath = 'rates.json';
+        const addEntryBtn = document.getElementById('addEntryBtn');
+        const addEntryModal = document.getElementById('addEntryModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const entryForm = document.getElementById('entryForm');
+
+        let multipliers = {};
+        let userId = null;
+        let userData = [];
+
+        // Helper object for annual frequencies
+        const annualFrequencies = {
+            'day': 365,
+            'week': 52,
+            'month': 12
+        };
+
+        // Function to format numbers with commas
+        const formatNumber = (num) => {
+            if (typeof num !== 'number' || isNaN(num)) return '0';
+            return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        };
+
+        const calculateCredits = () => {
+            const environment = environmentSelect.value;
+            const growthRate = parseFloat(growthRateInput.value) / 100;
+            
+            let totalDailyCredits = 0;
+            let totalAnnualRecurringCredits = 0;
+            let totalOneTimeCredits = 0;
+
+            document.querySelectorAll('.table-row').forEach(row => {
+                const volumeInput = row.querySelector('.volume-input');
+                const annualCreditsOutput = row.querySelector('.annual-credits-output');
+                const oneTimeCreditsOutput = row.querySelector('.one-time-credits-output');
+                const frequencyInput = row.querySelector('.frequency-input');
+                const scheduleSelect = row.querySelector('.schedule-select');
+                const oneTimeCheckbox = row.querySelector('.one-time-checkbox');
+
+                const volume = parseFloat(volumeInput.value.replace(/,/g, '')) || 0;
+                const frequency = parseFloat(frequencyInput.value) || 0;
+                const schedule = scheduleSelect.value;
+                const isOneTime = oneTimeCheckbox.checked;
+
+                const usageType = row.dataset.usageType;
+                let multiplier = 0;
+                for (const category in multipliers) {
+                    const item = multipliers[category].find(m => m.type === usageType);
+                    if (item) {
+                        multiplier = environment === 'production' ? item.production : item.sandbox;
+                        const unitDivisor = item.unitDivisor;
+                        const creditsPerRun = (volume / unitDivisor) * multiplier;
+                        
+                        if (isOneTime) {
+                            annualCreditsOutput.textContent = formatNumber(0);
+                            oneTimeCreditsOutput.textContent = formatNumber(creditsPerRun);
+                            totalOneTimeCredits += creditsPerRun;
+                        } else {
+                            const annualRuns = frequency * annualFrequencies[schedule];
+                            const annualCreditsForRow = creditsPerRun * annualRuns;
+                            annualCreditsOutput.textContent = formatNumber(annualCreditsForRow);
+                            oneTimeCreditsOutput.textContent = formatNumber(0);
+                            totalAnnualRecurringCredits += annualCreditsForRow;
+                        }
+                        break;
+                    }
+                }
+            });
+            
+            totalDailyCredits = totalAnnualRecurringCredits / 365;
+
+            const totalYear1 = totalAnnualRecurringCredits + totalOneTimeCredits;
+            const totalYear2 = totalYear1 * (1 + growthRate);
+            const totalYear3 = totalYear2 * (1 + growthRate);
+
+            document.getElementById('dailyCredits').textContent = formatNumber(totalDailyCredits);
+            document.getElementById('annualCredits').textContent = formatNumber(totalAnnualRecurringCredits);
+            document.getElementById('oneTimeCredits').textContent = formatNumber(totalOneTimeCredits);
+            document.getElementById('totalYear1').textContent = formatNumber(totalYear1);
+            document.getElementById('totalYear2').textContent = formatNumber(totalYear2);
+            document.getElementById('totalYear3').textContent = formatNumber(totalYear3);
+        };
+        
+        const updateTableFromData = () => {
+            let html = '';
+            for (const category in multipliers) {
+                html += `<tr class="bg-gray-200">
+                    <td colspan="8" class="px-4 py-2 font-bold text-gray-700">${category}</td>
+                </tr>`;
+                multipliers[category].forEach(item => {
+                    const savedItem = userData.find(u => u.type === item.type);
+                    const volume = savedItem ? savedItem.volume : 0;
+                    const frequency = savedItem ? savedItem.frequency : 1;
+                    const schedule = savedItem ? savedItem.schedule : 'day';
+                    const isOneTime = savedItem ? savedItem.oneTime : false;
+                    const id = savedItem ? savedItem.id : '';
+
+                    html += `
+                        <tr class="table-row" data-usage-type="${item.type}" data-id="${id}">
+                            <td class="px-4 py-2 text-sm text-gray-600">${item.type}</td>
+                            <td class="px-4 py-2">
+                                <input type="text" value="${volume}" class="volume-input w-full p-2 border rounded text-sm">
+                            </td>
+                            <td class="px-4 py-2 text-sm text-gray-600">${item.unit}</td>
+                            <td class="px-4 py-2">
+                                <input type="number" value="${frequency}" min="0" class="frequency-input w-full p-2 border rounded text-sm">
+                            </td>
+                            <td class="px-4 py-2">
+                                <select class="schedule-select w-full p-2 border rounded text-sm">
+                                    <option value="day" ${schedule === 'day' ? 'selected' : ''}>Day</option>
+                                    <option value="week" ${schedule === 'week' ? 'selected' : ''}>Week</option>
+                                    <option value="month" ${schedule === 'month' ? 'selected' : ''}>Month</option>
+                                </select>
+                            </td>
+                            <td class="px-4 py-2 text-center">
+                                <input type="checkbox" ${isOneTime ? 'checked' : ''} class="one-time-checkbox h-4 w-4 text-[#009EDB] border-gray-300 rounded focus:ring-[#009EDB]">
+                            </td>
+                            <td class="px-4 py-2">
+                                <span class="annual-credits-output text-sm font-semibold">0</span>
+                            </td>
+                            <td class="px-4 py-2">
+                                <span class="one-time-credits-output text-sm font-semibold">0</span>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+            inputTableBody.innerHTML = html;
+        };
+
+        const init = async () => {
+            try {
+                // Auth
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        document.getElementById('userId').textContent = userId;
+
+                        // Start listening for Firestore data changes
+                        onSnapshot(collection(db, `/artifacts/${__app_id}/users/${userId}/entries`), (snapshot) => {
+                            userData = [];
+                            snapshot.forEach((doc) => {
+                                userData.push({ id: doc.id, ...doc.data() });
+                            });
+                            updateTableFromData();
+                            calculateCredits();
+                        }, (error) => {
+                            console.error("Error listening to data:", error);
+                        });
+                    } else {
+                        // Sign in anonymously if not authenticated
+                        if (__initial_auth_token) {
+                            try {
+                                await signInWithCustomToken(auth, __initial_auth_token);
+                            } catch(e) {
+                                console.error("Error signing in with custom token:", e);
+                                await signInAnonymously(auth);
+                            }
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    }
+                });
+
+                // Fetch data rates from JSON
+                const response = await fetch(dataPath);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                multipliers = await response.json();
+                
+                // Add event listeners to trigger recalculation on change
+                environmentSelect.addEventListener('change', calculateCredits);
+                growthRateInput.addEventListener('input', calculateCredits);
+                inputTableBody.addEventListener('input', (event) => {
+                    const row = event.target.closest('.table-row');
+                    if (row) {
+                        const usageType = row.dataset.usageType;
+                        const docId = row.dataset.id;
+                        
+                        const volume = parseFloat(row.querySelector('.volume-input').value.replace(/,/g, '')) || 0;
+                        const frequency = parseFloat(row.querySelector('.frequency-input').value) || 0;
+                        const schedule = row.querySelector('.schedule-select').value;
+                        const isOneTime = row.querySelector('.one-time-checkbox').checked;
+
+                        const dataToSave = {
+                            type: usageType,
+                            volume: volume,
+                            frequency: frequency,
+                            schedule: schedule,
+                            oneTime: isOneTime
+                        };
+
+                        if (docId) {
+                            const docRef = doc(db, `/artifacts/${__app_id}/users/${userId}/entries`, docId);
+                            setDoc(docRef, dataToSave).catch(e => console.error("Error updating document:", e));
+                        } else {
+                            addDoc(collection(db, `/artifacts/${__app_id}/users/${userId}/entries`), dataToSave).catch(e => console.error("Error adding document:", e));
+                        }
+                        calculateCredits();
+                    }
+                });
+
+                inputTableBody.addEventListener('change', calculateCredits);
+
+            } catch (error) {
+                console.error("Could not initialize application:", error);
+                inputTableBody.innerHTML = `<tr class="text-center text-red-500"><td colspan="8">Error loading data. Please check the 'rates.json' file.</td></tr>`;
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
 </head>
 <body class="bg-gray-100 min-h-screen p-4 md:p-8">
     <div class="container">
@@ -118,151 +315,10 @@
                     </div>
                 </div>
             </div>
+            <div class="mt-8 text-center text-xs text-gray-500">
+                User ID: <span id="userId"></span>
+            </div>
         </div>
     </div>
-
-    <script>
-        const inputTableBody = document.querySelector('#inputTable tbody');
-        const environmentSelect = document.getElementById('environment');
-        const growthRateInput = document.getElementById('growthRate');
-        const dataPath = 'rates.json';
-        let multipliers = {};
-
-        // Helper object for annual frequencies
-        const annualFrequencies = {
-            'day': 365,
-            'week': 52,
-            'month': 12
-        };
-
-        // Function to format numbers with commas
-        const formatNumber = (num) => {
-            if (typeof num !== 'number' || isNaN(num)) return '0';
-            return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        };
-        
-        // Populate the table with usage types from the JSON data
-        const populateTable = () => {
-            let html = '';
-            for (const category in multipliers) {
-                html += `<tr class="bg-gray-200">
-                    <td colspan="8" class="px-4 py-2 font-bold text-gray-700">${category}</td>
-                </tr>`;
-                multipliers[category].forEach(item => {
-                    html += `
-                        <tr class="table-row">
-                            <td class="px-4 py-2 text-sm text-gray-600">${item.type}</td>
-                            <td class="px-4 py-2">
-                                <input type="text" data-type="${item.type}" data-unit-divisor="${item.unitDivisor}" data-production-multiplier="${item.production}" data-sandbox-multiplier="${item.sandbox}" value="0" class="volume-input w-full p-2 border rounded text-sm">
-                            </td>
-                            <td class="px-4 py-2 text-sm text-gray-600">${item.unit}</td>
-                            <td class="px-4 py-2">
-                                <input type="number" value="1" min="0" class="frequency-input w-full p-2 border rounded text-sm">
-                            </td>
-                            <td class="px-4 py-2">
-                                <select class="schedule-select w-full p-2 border rounded text-sm">
-                                    <option value="day">Day</option>
-                                    <option value="week">Week</option>
-                                    <option value="month">Month</option>
-                                </select>
-                            </td>
-                            <td class="px-4 py-2 text-center">
-                                <input type="checkbox" class="one-time-checkbox h-4 w-4 text-[#009EDB] border-gray-300 rounded focus:ring-[#009EDB]">
-                            </td>
-                            <td class="px-4 py-2">
-                                <span class="annual-credits-output text-sm font-semibold">0</span>
-                            </td>
-                            <td class="px-4 py-2">
-                                <span class="one-time-credits-output text-sm font-semibold">0</span>
-                            </td>
-                        </tr>
-                    `;
-                });
-            }
-            inputTableBody.innerHTML = html;
-        };
-        
-        // Calculate credits and update the summary
-        const calculateCredits = () => {
-            const environment = environmentSelect.value;
-            const growthRate = parseFloat(growthRateInput.value) / 100;
-            
-            let totalDailyCredits = 0;
-            let totalAnnualRecurringCredits = 0;
-            let totalOneTimeCredits = 0;
-
-            document.querySelectorAll('.table-row').forEach(row => {
-                const volumeInput = row.querySelector('.volume-input');
-                const annualCreditsOutput = row.querySelector('.annual-credits-output');
-                const oneTimeCreditsOutput = row.querySelector('.one-time-credits-output');
-                const frequencyInput = row.querySelector('.frequency-input');
-                const scheduleSelect = row.querySelector('.schedule-select');
-                const oneTimeCheckbox = row.querySelector('.one-time-checkbox');
-
-                // Normalize volume input (remove commas)
-                const volume = parseFloat(volumeInput.value.replace(/,/g, '')) || 0;
-                const frequency = parseFloat(frequencyInput.value) || 0;
-                const schedule = scheduleSelect.value;
-                const isOneTime = oneTimeCheckbox.checked;
-
-                const unitDivisor = parseFloat(volumeInput.dataset.unitDivisor);
-                const multiplier = environment === 'production' ? 
-                    parseFloat(volumeInput.dataset.productionMultiplier) : 
-                    parseFloat(volumeInput.dataset.sandboxMultiplier);
-
-                const creditsPerRun = (volume / unitDivisor) * multiplier;
-
-                if (isOneTime) {
-                    annualCreditsOutput.textContent = formatNumber(0);
-                    oneTimeCreditsOutput.textContent = formatNumber(creditsPerRun);
-                    totalOneTimeCredits += creditsPerRun;
-                } else {
-                    const annualRuns = frequency * annualFrequencies[schedule];
-                    const annualCreditsForRow = creditsPerRun * annualRuns;
-                    annualCreditsOutput.textContent = formatNumber(annualCreditsForRow);
-                    oneTimeCreditsOutput.textContent = formatNumber(0);
-                    totalAnnualRecurringCredits += annualCreditsForRow;
-                }
-            });
-            
-            totalDailyCredits = totalAnnualRecurringCredits / 365;
-
-            // Update summary values
-            const totalYear1 = totalAnnualRecurringCredits + totalOneTimeCredits;
-            const totalYear2 = totalYear1 * (1 + growthRate);
-            const totalYear3 = totalYear2 * (1 + growthRate);
-
-            document.getElementById('dailyCredits').textContent = formatNumber(totalDailyCredits);
-            document.getElementById('annualCredits').textContent = formatNumber(totalAnnualRecurringCredits);
-            document.getElementById('oneTimeCredits').textContent = formatNumber(totalOneTimeCredits);
-            document.getElementById('totalYear1').textContent = formatNumber(totalYear1);
-            document.getElementById('totalYear2').textContent = formatNumber(totalYear2);
-            document.getElementById('totalYear3').textContent = formatNumber(totalYear3);
-        };
-
-        // Fetch data and initialize the application
-        const init = async () => {
-            try {
-                const response = await fetch(dataPath);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                multipliers = await response.json();
-                populateTable();
-                
-                // Add event listeners to trigger recalculation on change
-                document.getElementById('environment').addEventListener('change', calculateCredits);
-                document.getElementById('growthRate').addEventListener('input', calculateCredits);
-                inputTableBody.addEventListener('input', calculateCredits);
-                inputTableBody.addEventListener('change', calculateCredits); // For select and checkbox changes
-                calculateCredits(); // Initial calculation
-            } catch (error) {
-                console.error("Could not load multipliers data:", error);
-                inputTableBody.innerHTML = `<tr class="text-center text-red-500"><td colspan="8">Error loading data. Please check the 'rates.json' file.</td></tr>`;
-            }
-        };
-
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
 </body>
 </html>
