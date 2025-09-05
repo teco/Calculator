@@ -9,7 +9,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, onSnapshot, addDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // This log level helps in debugging Firestore issues.
@@ -27,14 +27,10 @@
         const environmentSelect = document.getElementById('environment');
         const growthRateInput = document.getElementById('growthRate');
         const dataPath = 'rates.json';
-        const addEntryBtn = document.getElementById('addEntryBtn');
-        const addEntryModal = document.getElementById('addEntryModal');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const entryForm = document.getElementById('entryForm');
 
         let multipliers = {};
         let userId = null;
-        let userData = [];
+        let userData = {};
 
         // Helper object for annual frequencies
         const annualFrequencies = {
@@ -49,82 +45,22 @@
             return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
         };
 
-        const calculateCredits = () => {
-            const environment = environmentSelect.value;
-            const growthRate = parseFloat(growthRateInput.value) / 100;
-            
-            let totalDailyCredits = 0;
-            let totalAnnualRecurringCredits = 0;
-            let totalOneTimeCredits = 0;
-
-            document.querySelectorAll('.table-row').forEach(row => {
-                const volumeInput = row.querySelector('.volume-input');
-                const annualCreditsOutput = row.querySelector('.annual-credits-output');
-                const oneTimeCreditsOutput = row.querySelector('.one-time-credits-output');
-                const frequencyInput = row.querySelector('.frequency-input');
-                const scheduleSelect = row.querySelector('.schedule-select');
-                const oneTimeCheckbox = row.querySelector('.one-time-checkbox');
-
-                const volume = parseFloat(volumeInput.value.replace(/,/g, '')) || 0;
-                const frequency = parseFloat(frequencyInput.value) || 0;
-                const schedule = scheduleSelect.value;
-                const isOneTime = oneTimeCheckbox.checked;
-
-                const usageType = row.dataset.usageType;
-                let multiplier = 0;
-                for (const category in multipliers) {
-                    const item = multipliers[category].find(m => m.type === usageType);
-                    if (item) {
-                        multiplier = environment === 'production' ? item.production : item.sandbox;
-                        const unitDivisor = item.unitDivisor;
-                        const creditsPerRun = (volume / unitDivisor) * multiplier;
-                        
-                        if (isOneTime) {
-                            annualCreditsOutput.textContent = formatNumber(0);
-                            oneTimeCreditsOutput.textContent = formatNumber(creditsPerRun);
-                            totalOneTimeCredits += creditsPerRun;
-                        } else {
-                            const annualRuns = frequency * annualFrequencies[schedule];
-                            const annualCreditsForRow = creditsPerRun * annualRuns;
-                            annualCreditsOutput.textContent = formatNumber(annualCreditsForRow);
-                            oneTimeCreditsOutput.textContent = formatNumber(0);
-                            totalAnnualRecurringCredits += annualCreditsForRow;
-                        }
-                        break;
-                    }
-                }
-            });
-            
-            totalDailyCredits = totalAnnualRecurringCredits / 365;
-
-            const totalYear1 = totalAnnualRecurringCredits + totalOneTimeCredits;
-            const totalYear2 = totalYear1 * (1 + growthRate);
-            const totalYear3 = totalYear2 * (1 + growthRate);
-
-            document.getElementById('dailyCredits').textContent = formatNumber(totalDailyCredits);
-            document.getElementById('annualCredits').textContent = formatNumber(totalAnnualRecurringCredits);
-            document.getElementById('oneTimeCredits').textContent = formatNumber(totalOneTimeCredits);
-            document.getElementById('totalYear1').textContent = formatNumber(totalYear1);
-            document.getElementById('totalYear2').textContent = formatNumber(totalYear2);
-            document.getElementById('totalYear3').textContent = formatNumber(totalYear3);
-        };
-        
-        const updateTableFromData = () => {
+        const updateTable = () => {
             let html = '';
             for (const category in multipliers) {
                 html += `<tr class="bg-gray-200">
                     <td colspan="8" class="px-4 py-2 font-bold text-gray-700">${category}</td>
                 </tr>`;
                 multipliers[category].forEach(item => {
-                    const savedItem = userData.find(u => u.type === item.type);
+                    const savedItem = userData[item.type];
                     const volume = savedItem ? savedItem.volume : 0;
                     const frequency = savedItem ? savedItem.frequency : 1;
                     const schedule = savedItem ? savedItem.schedule : 'day';
                     const isOneTime = savedItem ? savedItem.oneTime : false;
-                    const id = savedItem ? savedItem.id : '';
+                    const docId = savedItem ? savedItem.id : '';
 
                     html += `
-                        <tr class="table-row" data-usage-type="${item.type}" data-id="${id}">
+                        <tr class="table-row" data-usage-type="${item.type}" data-id="${docId}">
                             <td class="px-4 py-2 text-sm text-gray-600">${item.type}</td>
                             <td class="px-4 py-2">
                                 <input type="text" value="${volume}" class="volume-input w-full p-2 border rounded text-sm">
@@ -156,8 +92,81 @@
             inputTableBody.innerHTML = html;
         };
 
+        const calculateCredits = () => {
+            const environment = environmentSelect.value;
+            const growthRate = parseFloat(growthRateInput.value) / 100;
+            
+            let totalDailyCredits = 0;
+            let totalAnnualRecurringCredits = 0;
+            let totalOneTimeCredits = 0;
+
+            document.querySelectorAll('.table-row').forEach(row => {
+                const volumeInput = row.querySelector('.volume-input');
+                const annualCreditsOutput = row.querySelector('.annual-credits-output');
+                const oneTimeCreditsOutput = row.querySelector('.one-time-credits-output');
+                const frequencyInput = row.querySelector('.frequency-input');
+                const scheduleSelect = row.querySelector('.schedule-select');
+                const oneTimeCheckbox = row.querySelector('.one-time-checkbox');
+
+                const volume = parseFloat(volumeInput.value.replace(/,/g, '')) || 0;
+                const frequency = parseFloat(frequencyInput.value) || 0;
+                const schedule = scheduleSelect.value;
+                const isOneTime = oneTimeCheckbox.checked;
+
+                const usageType = row.dataset.usageType;
+                let multiplier = 0;
+                let unitDivisor = 1;
+
+                for (const category in multipliers) {
+                    const item = multipliers[category].find(m => m.type === usageType);
+                    if (item) {
+                        multiplier = environment === 'production' ? item.production : item.sandbox;
+                        unitDivisor = item.unitDivisor;
+                        break;
+                    }
+                }
+                
+                const creditsPerRun = (volume / unitDivisor) * multiplier;
+
+                if (isOneTime) {
+                    annualCreditsOutput.textContent = formatNumber(0);
+                    oneTimeCreditsOutput.textContent = formatNumber(creditsPerRun);
+                    totalOneTimeCredits += creditsPerRun;
+                } else {
+                    const annualRuns = frequency * annualFrequencies[schedule];
+                    const annualCreditsForRow = creditsPerRun * annualRuns;
+                    annualCreditsOutput.textContent = formatNumber(annualCreditsForRow);
+                    oneTimeCreditsOutput.textContent = formatNumber(0);
+                    totalAnnualRecurringCredits += annualCreditsForRow;
+                }
+            });
+            
+            totalDailyCredits = totalAnnualRecurringCredits / 365;
+
+            const totalYear1 = totalAnnualRecurringCredits + totalOneTimeCredits;
+            const totalYear2 = totalYear1 * (1 + growthRate);
+            const totalYear3 = totalYear2 * (1 + growthRate);
+
+            document.getElementById('dailyCredits').textContent = formatNumber(totalDailyCredits);
+            document.getElementById('annualCredits').textContent = formatNumber(totalAnnualRecurringCredits);
+            document.getElementById('oneTimeCredits').textContent = formatNumber(totalOneTimeCredits);
+            document.getElementById('totalYear1').textContent = formatNumber(totalYear1);
+            document.getElementById('totalYear2').textContent = formatNumber(totalYear2);
+            document.getElementById('totalYear3').textContent = formatNumber(totalYear3);
+        };
+        
         const init = async () => {
             try {
+                // Fetch data rates from JSON first
+                const response = await fetch(dataPath);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                multipliers = await response.json();
+                
+                // Populate table with default values from rates.json
+                updateTable();
+                
                 // Auth
                 onAuthStateChanged(auth, async (user) => {
                     if (user) {
@@ -166,15 +175,16 @@
 
                         // Start listening for Firestore data changes
                         onSnapshot(collection(db, `/artifacts/${__app_id}/users/${userId}/entries`), (snapshot) => {
-                            userData = [];
+                            userData = {};
                             snapshot.forEach((doc) => {
-                                userData.push({ id: doc.id, ...doc.data() });
+                                userData[doc.data().type] = { id: doc.id, ...doc.data() };
                             });
-                            updateTableFromData();
+                            updateTable();
                             calculateCredits();
                         }, (error) => {
                             console.error("Error listening to data:", error);
                         });
+
                     } else {
                         // Sign in anonymously if not authenticated
                         if (__initial_auth_token) {
@@ -190,19 +200,13 @@
                     }
                 });
 
-                // Fetch data rates from JSON
-                const response = await fetch(dataPath);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                multipliers = await response.json();
-                
-                // Add event listeners to trigger recalculation on change
+                // Add event listeners to trigger recalculation and save on change
                 environmentSelect.addEventListener('change', calculateCredits);
                 growthRateInput.addEventListener('input', calculateCredits);
+                
                 inputTableBody.addEventListener('input', (event) => {
                     const row = event.target.closest('.table-row');
-                    if (row) {
+                    if (row && userId) {
                         const usageType = row.dataset.usageType;
                         const docId = row.dataset.id;
                         
@@ -219,21 +223,41 @@
                             oneTime: isOneTime
                         };
 
-                        if (docId) {
-                            const docRef = doc(db, `/artifacts/${__app_id}/users/${userId}/entries`, docId);
-                            setDoc(docRef, dataToSave).catch(e => console.error("Error updating document:", e));
-                        } else {
-                            addDoc(collection(db, `/artifacts/${__app_id}/users/${userId}/entries`), dataToSave).catch(e => console.error("Error adding document:", e));
-                        }
-                        calculateCredits();
+                        const docRef = doc(db, `/artifacts/${__app_id}/users/${userId}/entries`, usageType);
+                        setDoc(docRef, dataToSave).catch(e => console.error("Error updating document:", e));
                     }
+                    calculateCredits();
                 });
 
-                inputTableBody.addEventListener('change', calculateCredits);
+                inputTableBody.addEventListener('change', (event) => {
+                    const row = event.target.closest('.table-row');
+                    if (row && userId) {
+                        const usageType = row.dataset.usageType;
+                        const docId = row.dataset.id;
+                        
+                        const volume = parseFloat(row.querySelector('.volume-input').value.replace(/,/g, '')) || 0;
+                        const frequency = parseFloat(row.querySelector('.frequency-input').value) || 0;
+                        const schedule = row.querySelector('.schedule-select').value;
+                        const isOneTime = row.querySelector('.one-time-checkbox').checked;
+
+                        const dataToSave = {
+                            type: usageType,
+                            volume: volume,
+                            frequency: frequency,
+                            schedule: schedule,
+                            oneTime: isOneTime
+                        };
+
+                        const docRef = doc(db, `/artifacts/${__app_id}/users/${userId}/entries`, usageType);
+                        setDoc(docRef, dataToSave).catch(e => console.error("Error updating document:", e));
+                    }
+                    calculateCredits();
+                });
+
 
             } catch (error) {
                 console.error("Could not initialize application:", error);
-                inputTableBody.innerHTML = `<tr class="text-center text-red-500"><td colspan="8">Error loading data. Please check the 'rates.json' file.</td></tr>`;
+                inputTableBody.innerHTML = `<tr class="text-center text-red-500"><td colspan="8">Error loading data. Please check the 'rates.json' file or your network connection.</td></tr>`;
             }
         };
 
