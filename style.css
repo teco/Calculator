@@ -1740,6 +1740,22 @@ select.form-control {
   font-weight: var(--font-weight-semibold);
 }
 
+/* Header subtitle styling for both pages */
+.header-subtitle {
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+  line-height: var(--line-height-relaxed);
+}
+
+/* Header title styling */
+.header h1 {
+  max-width: 700px;
+  margin: 0 auto 1rem auto;
+  text-align: center;
+  line-height: var(--line-height-tight);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .container {
