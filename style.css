@@ -1337,8 +1337,29 @@ body {
 
 .main-content {
   display: grid;
+  grid-template-areas: 
+    "dashboard dashboard"
+    "calculator calculator"
+    "tips tips";
+  grid-template-columns: 1fr 1fr;
   gap: 2rem;
   overflow-y: auto;
+}
+
+.results-dashboard {
+  grid-area: dashboard;
+}
+
+.calculator-sections {
+  grid-area: calculator;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  grid-column: 1 / -1;
+}
+
+.optimization-tips {
+  grid-area: tips;
 }
 /* Category Sections */
 .category-section {
@@ -1609,6 +1630,18 @@ select.form-control {
   
   .nav-links {
     gap: 1rem;
+  }
+  
+  .main-content {
+    grid-template-areas: 
+      "dashboard"
+      "calculator"
+      "tips";
+    grid-template-columns: 1fr;
+  }
+  
+  .calculator-sections {
+    grid-template-columns: 1fr;
   }
   
   .services-grid {
