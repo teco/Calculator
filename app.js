@@ -192,6 +192,281 @@ function calculateCredits(qty, multiplier, freq) {
   return qty * multiplier * freqMult;
 }
 
+// --- Export Functions ---
+function exportToPDF() {
+  const data = collectExportData();
+  generatePDF(data);
+}
+
+function exportToHTML() {
+  const data = collectExportData();
+  const htmlContent = generateHTMLReport(data);
+  const newWindow = window.open('', '_blank');
+  newWindow.document.write(htmlContent);
+  newWindow.document.close();
+}
+
+function collectExportData() {
+  const exportData = {
+    timestamp: new Date().toISOString(),
+    calculator: 'Salesforce Data Cloud Credit Calculator',
+    summary: {
+      totalAnnualCredits: 0,
+      totalMonthlyCredits: 0,
+      totalDailyCredits: 0
+    },
+    services: []
+  };
+
+  let totalAnnual = 0, totalMonthly = 0, totalDaily = 0;
+
+  [...usageTypes.dataServices, ...usageTypes.segmentationActivation].forEach(item => {
+    const input = document.getElementById('input-' + item.id);
+    const freqSel = document.getElementById('freq-' + item.id);
+    const qty = parseFloat(input.value) || 0;
+    const freq = freqSel.value;
+    const credits = calculateCredits(qty, item.multiplier, freq);
+
+    if (qty > 0) {
+      const serviceData = {
+        name: item.name,
+        description: item.description,
+        volume: qty,
+        unit: item.unit,
+        frequency: freq,
+        multiplier: item.multiplier,
+        totalCredits: credits
+      };
+
+      // Calculate for summary
+      if (freq === 'onetime') {
+        totalAnnual += credits;
+      } else if (freq === 'daily') {
+        totalAnnual += credits;
+        totalDaily += credits / 365;
+        totalMonthly += credits / 12;
+      } else if (freq === 'weekly') {
+        totalAnnual += credits;
+        totalDaily += credits / 365;
+        totalMonthly += credits / 12;
+      } else if (freq === 'monthly') {
+        totalAnnual += credits;
+        totalMonthly += credits;
+        totalDaily += credits / 30;
+      }
+
+      exportData.services.push(serviceData);
+    }
+  });
+
+  exportData.summary.totalAnnualCredits = totalAnnual;
+  exportData.summary.totalMonthlyCredits = totalMonthly;
+  exportData.summary.totalDailyCredits = totalDaily;
+
+  return exportData;
+}
+
+function generatePDF(data) {
+  const htmlContent = generateHTMLReport(data);
+  
+  // Create a new window for PDF generation
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(htmlContent);
+  printWindow.document.close();
+  
+  // Wait for content to load, then trigger print dialog
+  printWindow.onload = function() {
+    setTimeout(() => {
+      printWindow.print();
+    }, 500);
+  };
+}
+
+function generateHTMLReport(data) {
+  const currentDate = new Date(data.timestamp).toLocaleDateString();
+  const currentTime = new Date(data.timestamp).toLocaleTimeString();
+  
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Salesforce Data Cloud Credit Calculation Report</title>
+      <style>
+        @media print {
+          @page { margin: 1in; }
+          body { font-family: Arial, sans-serif; }
+        }
+        body {
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 20px;
+        }
+        .header {
+          text-align: center;
+          border-bottom: 2px solid #0176d3;
+          padding-bottom: 20px;
+          margin-bottom: 30px;
+        }
+        .header h1 {
+          color: #0176d3;
+          margin: 0;
+          font-size: 24px;
+        }
+        .header p {
+          margin: 5px 0;
+          color: #666;
+        }
+        .summary {
+          background: #f8f9fa;
+          padding: 20px;
+          border-radius: 8px;
+          margin-bottom: 30px;
+        }
+        .summary h2 {
+          color: #0176d3;
+          margin-top: 0;
+        }
+        .summary-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 20px;
+          margin-top: 15px;
+        }
+        .summary-item {
+          text-align: center;
+          padding: 15px;
+          background: white;
+          border-radius: 6px;
+          border: 1px solid #ddd;
+        }
+        .summary-item .label {
+          font-size: 12px;
+          color: #666;
+          text-transform: uppercase;
+          margin-bottom: 5px;
+        }
+        .summary-item .value {
+          font-size: 18px;
+          font-weight: bold;
+          color: #0176d3;
+        }
+        .services {
+          margin-bottom: 30px;
+        }
+        .services h2 {
+          color: #0176d3;
+          border-bottom: 1px solid #ddd;
+          padding-bottom: 10px;
+        }
+        .service-item {
+          background: white;
+          border: 1px solid #ddd;
+          border-radius: 6px;
+          padding: 15px;
+          margin-bottom: 15px;
+        }
+        .service-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 10px;
+        }
+        .service-name {
+          font-weight: bold;
+          color: #333;
+          font-size: 16px;
+        }
+        .service-credits {
+          font-weight: bold;
+          color: #0176d3;
+          font-size: 16px;
+        }
+        .service-details {
+          display: grid;
+          grid-template-columns: 1fr 1fr 1fr;
+          gap: 10px;
+          font-size: 14px;
+          color: #666;
+        }
+        .footer {
+          text-align: center;
+          margin-top: 40px;
+          padding-top: 20px;
+          border-top: 1px solid #ddd;
+          color: #666;
+          font-size: 12px;
+        }
+        @media print {
+          .summary-grid { grid-template-columns: 1fr; }
+          .service-details { grid-template-columns: 1fr; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>Salesforce Data Cloud Credit Calculation Report</h1>
+        <p>Generated on ${currentDate} at ${currentTime}</p>
+      </div>
+      
+      <div class="summary">
+        <h2>Credit Usage Summary</h2>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <div class="label">Annual Credits</div>
+            <div class="value">${formatNumber(data.summary.totalAnnualCredits)}</div>
+          </div>
+          <div class="summary-item">
+            <div class="label">Monthly Credits</div>
+            <div class="value">${formatNumber(data.summary.totalMonthlyCredits)}</div>
+          </div>
+          <div class="summary-item">
+            <div class="label">Daily Credits</div>
+            <div class="value">${formatNumber(data.summary.totalDailyCredits)}</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="services">
+        <h2>Service Details</h2>
+        ${data.services.map(service => `
+          <div class="service-item">
+            <div class="service-header">
+              <div class="service-name">${service.name}</div>
+              <div class="service-credits">${formatNumber(service.totalCredits)} credits</div>
+            </div>
+            <div class="service-details">
+              <div><strong>Volume:</strong> ${formatNumber(service.volume)} ${service.unit}</div>
+              <div><strong>Frequency:</strong> ${service.frequency}</div>
+              <div><strong>Multiplier:</strong> ${service.multiplier}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      
+      <div class="footer">
+        <p>This report was generated by the Salesforce Data Cloud Credit Calculator</p>
+        <p>For more information, visit your Salesforce Data Cloud documentation</p>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
+function downloadFile(content, filename, mimeType) {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 // --- Main rendering ---
 document.addEventListener('DOMContentLoaded', function () {
   // Sections in your .html
@@ -250,6 +525,10 @@ document.addEventListener('DOMContentLoaded', function () {
           <p><strong>Total Annual Credits Used:</strong> ${formatNumber(totalAnnual)}</p>
           <p><strong>Total Monthly Credits Used:</strong> ${formatNumber(totalMonthly)}</p>
           <p><strong>Total Daily Credits Used:</strong> ${formatNumber(totalDaily)}</p>
+        </div>
+        <div class="export-buttons">
+          <button onclick="exportToPDF()" class="export-btn export-pdf">Export PDF</button>
+          <button onclick="exportToHTML()" class="export-btn export-html">View Report</button>
         </div>
       </div>
     `;
