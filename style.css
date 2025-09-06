@@ -1345,9 +1345,28 @@ body {
 }
 
 .calculator-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Data Services Credits - Two Column Grid */
+#data-services-sections {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
+}
+
+#data-services-sections h2 {
+  grid-column: 1 / -1;
+  margin-bottom: 1.5rem;
+}
+
+/* Segmentation & Activation - Keep as single column for now */
+#segmentation-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .optimization-tips {
