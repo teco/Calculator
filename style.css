@@ -1688,9 +1688,16 @@ select.form-control {
 }
 
 .glossary-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 1.5rem !important;
+  width: 100% !important;
+}
+
+.glossary-grid .glossary-card {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
 }
 
 .glossary-card {
