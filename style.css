@@ -1501,23 +1501,29 @@ select.form-control {
   background: var(--color-surface) !important;
   border: 1px solid var(--color-card-border) !important;
   border-radius: var(--border-radius-lg) !important;
-  padding: 2rem 2rem 4rem 2rem !important;
+  padding: 2rem !important;
   box-shadow: var(--shadow-sm) !important;
   min-height: 300px !important;
   position: static !important;
-  text-align: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
 }
 
 .dashboard-card h3 {
-  margin: 0 0 3rem 0 !important;
+  margin: 0 0 2rem 0 !important;
   font-size: var(--font-size-xl) !important;
   color: var(--color-text) !important;
   text-align: center !important;
+  position: absolute !important;
+  top: 2rem !important;
+  left: 2rem !important;
+  right: 2rem !important;
 }
 
 .dashboard-card p {
-  margin: 1rem 0 !important;
-  text-align: center !important;
+  margin: 0.5rem 0 !important;
+  text-align: left !important;
   font-size: var(--font-size-base) !important;
   color: var(--color-text) !important;
 }
