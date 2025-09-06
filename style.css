@@ -1511,6 +1511,10 @@ select.form-control {
   border-radius: var(--border-radius-lg);
   padding: 2rem;
   box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 300px;
 }
 
 .results-card h3 {
