@@ -1504,10 +1504,9 @@ select.form-control {
   padding: 2rem !important;
   box-shadow: var(--shadow-sm) !important;
   min-height: 300px !important;
-  position: static !important;
+  position: relative !important;
   display: flex !important;
   flex-direction: column !important;
-  justify-content: center !important;
 }
 
 .dashboard-card h3 {
@@ -1515,10 +1514,14 @@ select.form-control {
   font-size: var(--font-size-xl) !important;
   color: var(--color-text) !important;
   text-align: center !important;
-  position: absolute !important;
-  top: 2rem !important;
-  left: 2rem !important;
-  right: 2rem !important;
+  flex-shrink: 0 !important;
+}
+
+.dashboard-card .content-wrapper {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
 }
 
 .dashboard-card p {
