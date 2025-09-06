@@ -1342,6 +1342,12 @@ body {
   overflow-y: auto;
 }
 
+.top-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
 .results-dashboard {
   width: 100%;
 }
@@ -1508,7 +1514,7 @@ select.form-control {
 }
 
 .results-card h3 {
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 2.5rem 0;
   font-size: var(--font-size-xl);
   color: var(--color-text);
   text-align: center;
@@ -1624,6 +1630,11 @@ select.form-control {
   
   .nav-links {
     gap: 1rem;
+  }
+  
+  .top-section {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
   
   .calculator-sections {
