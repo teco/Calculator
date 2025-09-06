@@ -1504,31 +1504,28 @@ select.form-control {
   padding: 2rem !important;
   box-shadow: var(--shadow-sm) !important;
   min-height: 300px !important;
-  position: relative !important;
-  display: flex !important;
-  flex-direction: column !important;
+  display: block !important;
 }
 
 .dashboard-card h3 {
-  margin: 0 0 2rem 0 !important;
+  margin: 0 0 3rem 0 !important;
   font-size: var(--font-size-xl) !important;
   color: var(--color-text) !important;
   text-align: center !important;
-  flex-shrink: 0 !important;
+  display: block !important;
 }
 
 .dashboard-card .content-wrapper {
-  flex: 1 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
+  padding-top: 2rem !important;
+  text-align: left !important;
 }
 
 .dashboard-card p {
-  margin: 0.5rem 0 !important;
-  text-align: center !important;
+  margin: 1rem 0 !important;
+  text-align: left !important;
   font-size: var(--font-size-base) !important;
   color: var(--color-text) !important;
+  display: block !important;
 }
 
 .result-item {
