@@ -19,145 +19,189 @@
                 Este documento fornece um glossário abrangente de atividades no Salesforce Data Cloud que geram cobrança.
             </p>
         </header>
-        <main>
-            <h2>Data Service Credits</h2>
-            <p>
-                Data Service Credits são os créditos primários usados para a maioria das tarefas de processamento de dados, harmonização e análise dentro do ecossistema do Data Cloud.
-            </p>
-            <h3>(External) Data Pipeline (Batch & Streaming)</h3>
-            <p>
-                <strong>Descrição:</strong>
-                Refere-se à ingestão de dados de qualquer fonte não-Salesforce, como Amazon S3, data lakes externos ou via API. A ingestão de streaming é para dados quase em tempo real de fontes como o conector de Site/Aplicativo Móvel ou a API de ingestão.<br>
-                <strong>Exemplo Prático:</strong>
-                Ingerir 1 milhão de registros de perfil de cliente de um sistema externo via um pipeline em lote consome 2.000 créditos. Ingerir 2 milhões de eventos de interação de carrinho via um pipeline de streaming consome 10.000 créditos.<br>
-                <strong>Consideração:</strong>
-                O processamento em lote é significativamente mais barato que o streaming.
-            </p>
-            <h3>Internal Data Pipeline (Batch & Streaming)</h3>
-            <p>
-                <strong>Descrição:</strong>
-                É para a ingestão de dados estruturados de conectores nativos da Salesforce como Salesforce CRM, Marketing Cloud e Commerce Cloud. Esta atividade está incluída e não consome créditos.<br>
-                <strong>Exemplo Prático:</strong>
-                Ingerir 5 milhões de registros de contato do Sales Cloud para o Data Cloud consome 0 créditos.<br>
-                <strong>Consideração:</strong>
-                Embora a ingestão seja gratuita, esses dados ainda consumirão créditos em todos os processos posteriores como transformações, unificação e insights calculados.
-            </p>
-            <h3>Data Transforms (Batch & Streaming)</h3>
-            <p>
-                <strong>Descrição:</strong>
-                Envolve a limpeza, padronização ou enriquecimento de dados usando a funcionalidade de transformação do Data Cloud. As transformações em lote são para processamento agendado, enquanto as transformações de transmissão operam em dados quase em tempo real.<br>
-                <strong>Exemplo Prático:</strong>
-                Aplicar uma transformação em lote a 2 milhões de linhas para padronizar códigos de país custaria (2M/1M) * 400 = 800 créditos.<br>
-                <strong>Consideração:</strong>
-                O uso de transformação em lote é calculado com base no número maior de linhas lidas ou escritas.
-            </p>
-            <h3>Profile Unification (Batch)</h3>
-            <p>
-                <strong>Descrição:</strong>
-                É o processo de correspondência e fusão de dados de diferentes fontes para criar um perfil de cliente unificado usando conjuntos de regras de resolução de identidade.<br>
-                <strong>Exemplo Prático:</strong>
-                Unificar 1 milhão de perfis de origem pela primeira vez consome 100.000 créditos.<br>
-                <strong>Consideração:</strong>
-                O consumo é baseado no número de perfis de origem processados.
-            </p>
-            <h3>Calculated Insights (Batch & Streaming)</h3>
-            <p>
-                <strong>Descrição:</strong>
-                Envolve a criação de métricas e dimensões pré-calculadas em seus dados.<br>
-                <strong>Exemplo Prático:</strong>
-                Um Insight Calculado em lote que une um DMO com 2 milhões de registros e outro com 1 milhão de registros processará 3 milhões de registros no total, custando (3M/1M) * 15 = 45 créditos cada vez que for executado.<br>
-                <strong>Consideração:</strong>
-                O uso é baseado no número de registros usados para criar o insight.
-            </p>
-            <h3>Data Queries</h3>
-            <p>
-                <strong>Descrição:</strong>
-                Abrange qualquer consulta SQL executada contra dados do Data Cloud.<br>
-                <strong>Exemplo Prático:</strong>
-                Executar uma consulta que processa 2,5 milhões de registros consumiria (2,5M/1M) * 2 = 5 créditos.<br>
-                <strong>Consideração:</strong>
-                Otimize consultas com cláusulas WHERE para reduzir o custo.
-            </p>
-            <h3>Unstructured Data Processed</h3>
-            <p>
-                <strong>Descrição:</strong>
-                É para o processamento de arquivos como PDFs, áudio, vídeo ou documentos para uso com IA e pesquisa vetorial.<br>
-                <strong>Exemplo Prático:</strong>
-                Processar 100 documentos PDF de 1 MB consome 6.000 créditos.<br>
-                <strong>Consideração:</strong>
-                O uso é computado apenas uma vez tanto na “fragmentação” quanto na “vetorização”.
-            </p>
-            <h3>Data Federation (Zero-Copy)</h3>
-            <p>
-                <strong>Descrição:</strong>
-                Aplica-se ao usar conectores “Bring Your Own Lake”.<br>
-                <strong>Exemplo Prático:</strong>
-                Consultar uma visualização no Snowflake que retorna 5 milhões de registros consome 350 créditos.<br>
-                <strong>Consideração:</strong>
-                Compartilhar dados para mesma região pode não consumir créditos.
-            </p>
-            <h3>Sub-second Real-Time Events & API</h3>
-            <p>
-                <strong>Descrição:</strong>
-                Para processamento de eventos e chamadas de API na camada sub-segundo, usado para personalização em tempo real.<br>
-                <strong>Exemplo Prático:</strong>
-                Ingerir 2 milhões de eventos de interação diariamente consumiria ~10.000 créditos.<br>
-                <strong>Consideração:</strong>
-                O uso é soma de todos eventos, chamadas de API e ações processadas.
-            </p>
-            <h3>Inferences</h3>
-            <p>
-                <strong>Descrição:</strong>
-                Uma inferência é uma saída de um modelo de IA preditivo.<br>
-                <strong>Exemplo Prático:</strong>
-                Executar previsão em lote em 100.000 registros gera 350 créditos.<br>
-                <strong>Consideração:</strong>
-                Não especificado no documento de origem.
-            </p>
-            <h2>Créditos de Segmentação e Ativação</h2>
-            <p>
-                Consumidos quando você cria e ativa públicos.
-            </p>
-            <h3>Segment Rows Processed</h3>
-            <p>
-                <strong>Descrição:</strong>
-                Custo de crédito para criar/atualizar segmentos.<br>
-                <strong>Exemplo Prático:</strong>
-                Construir um segmento filtrando 25M de linhas custa 500 créditos por atualização.<br>
-                <strong>Consideração:</strong>
-                Use segmentos aninhados ou Insights Calculados para pré-filtrar dados.
-            </p>
-            <h3>Batch Activation</h3>
-            <p>
-                <strong>Descrição:</strong>
-                Publicar um segmento para ativação.<br>
-                <strong>Exemplo Prático:</strong>
-                Ativar um segmento com 2M membros consome 20 créditos.<br>
-                <strong>Consideração:</strong>
-                Use atualizações incrementais para economizar créditos.
-            </p>
-            <h3>Activate DMO - Streaming</h3>
-            <p>
-                <strong>Descrição:</strong>
-                Para ativações quase em tempo real (ex: API do Meta).<br>
-                <strong>Exemplo Prático:</strong>
-                Processa 1M registros, consome 1.600 créditos.<br>
-                <strong>Consideração:</strong>
-                O uso duplica se grafo de dados for utilizado.
-            </p>
-            <h2>Outros Add Ons que geram cobrança (Custo Fixo)</h2>
-            <h3>Data Storage</h3>
-            <p>
-                Licenças vêm com alocação base; excedente requer compra adicional.
-            </p>
-            <h3>Data Spaces</h3>
-            <p>
-                Espaços adicionais podem ser adquiridos por taxa anual.
-            </p>
-            <h3>Ad Audiences</h3>
-            <p>
-                Para ativar segmentos em plataformas de anúncios, requer complemento cobrado por público/ano.
-            </p>
+        <main class="glossary-main">
+            <div class="glossary-section">
+                <h2 class="section-title">Data Service Credits</h2>
+                <p class="section-description">
+                    Data Service Credits são os créditos primários usados para a maioria das tarefas de processamento de dados, harmonização e análise dentro do ecossistema do Data Cloud.
+                </p>
+                <div class="glossary-grid">
+                    <div class="glossary-card">
+                        <h3 class="card-title">(External) Data Pipeline (Batch & Streaming)</h3>
+                        <div class="card-content">
+                            <p><strong>Descrição:</strong><br>
+                            Refere-se à ingestão de dados de qualquer fonte não-Salesforce, como Amazon S3, data lakes externos ou via API. A ingestão de streaming é para dados quase em tempo real de fontes como o conector de Site/Aplicativo Móvel ou a API de ingestão.</p>
+                            <p><strong>Exemplo Prático:</strong><br>
+                            Ingerir 1 milhão de registros de perfil de cliente de um sistema externo via um pipeline em lote consome 2.000 créditos. Ingerir 2 milhões de eventos de interação de carrinho via um pipeline de streaming consome 10.000 créditos.</p>
+                            <p><strong>Consideração:</strong><br>
+                            O processamento em lote é significativamente mais barato que o streaming.</p>
+                        </div>
+                    </div>
+                    <div class="glossary-card">
+                        <h3 class="card-title">Internal Data Pipeline (Batch & Streaming)</h3>
+                        <div class="card-content">
+                            <p><strong>Descrição:</strong><br>
+                            É para a ingestão de dados estruturados de conectores nativos da Salesforce como Salesforce CRM, Marketing Cloud e Commerce Cloud. Esta atividade está incluída e não consome créditos.</p>
+                            <p><strong>Exemplo Prático:</strong><br>
+                            Ingerir 5 milhões de registros de contato do Sales Cloud para o Data Cloud consome 0 créditos.</p>
+                            <p><strong>Consideração:</strong><br>
+                            Embora a ingestão seja gratuita, esses dados ainda consumirão créditos em todos os processos posteriores como transformações, unificação e insights calculados.</p>
+                        </div>
+                    </div>
+                    <div class="glossary-card">
+                        <h3 class="card-title">Data Transforms (Batch & Streaming)</h3>
+                        <div class="card-content">
+                            <p><strong>Descrição:</strong><br>
+                            Envolve a limpeza, padronização ou enriquecimento de dados usando a funcionalidade de transformação do Data Cloud. As transformações em lote são para processamento agendado, enquanto as transformações de transmissão operam em dados quase em tempo real.</p>
+                            <p><strong>Exemplo Prático:</strong><br>
+                            Aplicar uma transformação em lote a 2 milhões de linhas para padronizar códigos de país custaria (2M/1M) * 400 = 800 créditos.</p>
+                            <p><strong>Consideração:</strong><br>
+                            O uso de transformação em lote é calculado com base no número maior de linhas lidas ou escritas.</p>
+                        </div>
+                    </div>
+                    <div class="glossary-card">
+                        <h3 class="card-title">Profile Unification (Batch)</h3>
+                        <div class="card-content">
+                            <p><strong>Descrição:</strong><br>
+                            É o processo de correspondência e fusão de dados de diferentes fontes para criar um perfil de cliente unificado usando conjuntos de regras de resolução de identidade.</p>
+                            <p><strong>Exemplo Prático:</strong><br>
+                            Unificar 1 milhão de perfis de origem pela primeira vez consome 100.000 créditos.</p>
+                            <p><strong>Consideração:</strong><br>
+                            O consumo é baseado no número de perfis de origem processados.</p>
+                        </div>
+                    </div>
+                    <div class="glossary-card">
+                        <h3 class="card-title">Calculated Insights (Batch & Streaming)</h3>
+                        <div class="card-content">
+                            <p><strong>Descrição:</strong><br>
+                            Envolve a criação de métricas e dimensões pré-calculadas em seus dados.</p>
+                            <p><strong>Exemplo Prático:</strong><br>
+                            Um Insight Calculado em lote que une um DMO com 2 milhões de registros e outro com 1 milhão de registros processará 3 milhões de registros no total, custando (3M/1M) * 15 = 45 créditos cada vez que for executado.</p>
+                            <p><strong>Consideração:</strong><br>
+                            O uso é baseado no número de registros usados para criar o insight.</p>
+                        </div>
+                    </div>
+                    <div class="glossary-card">
+                        <h3 class="card-title">Data Queries</h3>
+                        <div class="card-content">
+                            <p><strong>Descrição:</strong><br>
+                            Abrange qualquer consulta SQL executada contra dados do Data Cloud.</p>
+                            <p><strong>Exemplo Prático:</strong><br>
+                            Executar uma consulta que processa 2,5 milhões de registros consumiria (2,5M/1M) * 2 = 5 créditos.</p>
+                            <p><strong>Consideração:</strong><br>
+                            Otimize consultas com cláusulas WHERE para reduzir o custo.</p>
+                        </div>
+                    </div>
+                    <div class="glossary-card">
+                        <h3 class="card-title">Unstructured Data Processed</h3>
+                        <div class="card-content">
+                            <p><strong>Descrição:</strong><br>
+                            É para o processamento de arquivos como PDFs, áudio, vídeo ou documentos para uso com IA e pesquisa vetorial.</p>
+                            <p><strong>Exemplo Prático:</strong><br>
+                            Processar 100 documentos PDF de 1 MB consome 6.000 créditos.</p>
+                            <p><strong>Consideração:</strong><br>
+                            O uso é computado apenas uma vez tanto na “fragmentação” quanto na “vetorização”.</p>
+                        </div>
+                    </div>
+                    <div class="glossary-card">
+                        <h3 class="card-title">Data Federation (Zero-Copy)</h3>
+                        <div class="card-content">
+                            <p><strong>Descrição:</strong><br>
+                            Aplica-se ao usar conectores “Bring Your Own Lake”.</p>
+                            <p><strong>Exemplo Prático:</strong><br>
+                            Consultar uma visualização no Snowflake que retorna 5 milhões de registros consome 350 créditos.</p>
+                            <p><strong>Consideração:</strong><br>
+                            Compartilhar dados para mesma região pode não consumir créditos.</p>
+                        </div>
+                    </div>
+                    <div class="glossary-card">
+                        <h3 class="card-title">Sub-second Real-Time Events & API</h3>
+                        <div class="card-content">
+                            <p><strong>Descrição:</strong><br>
+                            Para processamento de eventos e chamadas de API na camada sub-segundo, usado para personalização em tempo real.</p>
+                            <p><strong>Exemplo Prático:</strong><br>
+                            Ingerir 2 milhões de eventos de interação diariamente consumiria ~10.000 créditos.</p>
+                            <p><strong>Consideração:</strong><br>
+                            O uso é soma de todos eventos, chamadas de API e ações processadas.</p>
+                        </div>
+                    </div>
+                    <div class="glossary-card">
+                        <h3 class="card-title">Inferences</h3>
+                        <div class="card-content">
+                            <p><strong>Descrição:</strong><br>
+                            Uma inferência é uma saída de um modelo de IA preditivo.</p>
+                            <p><strong>Exemplo Prático:</strong><br>
+                            Executar previsão em lote em 100.000 registros gera 350 créditos.</p>
+                            <p><strong>Consideração:</strong><br>
+                            Não especificado no documento de origem.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="glossary-section">
+                <h2 class="section-title">Créditos de Segmentação e Ativação</h2>
+                <p class="section-description">
+                    Consumidos quando você cria e ativa públicos.
+                </p>
+                <div class="glossary-grid">
+                    <div class="glossary-card">
+                        <h3 class="card-title">Segment Rows Processed</h3>
+                        <div class="card-content">
+                            <p><strong>Descrição:</strong><br>
+                            Custo de crédito para criar/atualizar segmentos.</p>
+                            <p><strong>Exemplo Prático:</strong><br>
+                            Construir um segmento filtrando 25M de linhas custa 500 créditos por atualização.</p>
+                            <p><strong>Consideração:</strong><br>
+                            Use segmentos aninhados ou Insights Calculados para pré-filtrar dados.</p>
+                        </div>
+                    </div>
+                    <div class="glossary-card">
+                        <h3 class="card-title">Batch Activation</h3>
+                        <div class="card-content">
+                            <p><strong>Descrição:</strong><br>
+                            Publicar um segmento para ativação.</p>
+                            <p><strong>Exemplo Prático:</strong><br>
+                            Ativar um segmento com 2M membros consome 20 créditos.</p>
+                            <p><strong>Consideração:</strong><br>
+                            Use atualizações incrementais para economizar créditos.</p>
+                        </div>
+                    </div>
+                    <div class="glossary-card">
+                        <h3 class="card-title">Activate DMO - Streaming</h3>
+                        <div class="card-content">
+                            <p><strong>Descrição:</strong><br>
+                            Para ativações quase em tempo real (ex: API do Meta).</p>
+                            <p><strong>Exemplo Prático:</strong><br>
+                            Processa 1M registros, consome 1.600 créditos.</p>
+                            <p><strong>Consideração:</strong><br>
+                            O uso duplica se grafo de dados for utilizado.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="glossary-section">
+                <h2 class="section-title">Outros Add Ons que geram cobrança (Custo Fixo)</h2>
+                <div class="glossary-grid">
+                    <div class="glossary-card">
+                        <h3 class="card-title">Data Storage</h3>
+                        <div class="card-content">
+                            <p>Licenças vêm com alocação base; excedente requer compra adicional.</p>
+                        </div>
+                    </div>
+                    <div class="glossary-card">
+                        <h3 class="card-title">Data Spaces</h3>
+                        <div class="card-content">
+                            <p>Espaços adicionais podem ser adquiridos por taxa anual.</p>
+                        </div>
+                    </div>
+                    <div class="glossary-card">
+                        <h3 class="card-title">Ad Audiences</h3>
+                        <div class="card-content">
+                            <p>Para ativar segmentos em plataformas de anúncios, requer complemento cobrado por público/ano.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <a href="index.html" class="nav-link">← Voltar para Calculadora</a>
         </main>
     </div>
