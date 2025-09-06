@@ -927,15 +927,7 @@ select.form-control {
     font-size: var(--font-size-lg);
 }
 
-.results-dashboard {
-    background: var(--color-surface);
-    border: 1px solid var(--color-card-border);
-    border-radius: var(--radius-lg);
-    padding: var(--space-24);
-    position: sticky;
-    top: var(--space-20);
-    box-shadow: var(--shadow-lg);
-}
+
 
 .dashboard-header h2 {
     margin-bottom: var(--space-20);
@@ -1506,30 +1498,31 @@ select.form-control {
 
 /* Results Dashboard */
 .results-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-card-border);
-  border-radius: var(--border-radius-lg);
-  padding: 2rem;
-  box-shadow: var(--shadow-sm);
-  min-height: 300px;
-  display: flex;
-  flex-direction: column;
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-card-border) !important;
+  border-radius: var(--border-radius-lg) !important;
+  padding: 2rem !important;
+  box-shadow: var(--shadow-sm) !important;
+  min-height: 300px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: static !important;
 }
 
 .results-card h3 {
-  margin: 0 0 2rem 0;
-  font-size: var(--font-size-xl);
-  color: var(--color-text);
-  text-align: center;
-  flex-shrink: 0;
+  margin: 0 0 2rem 0 !important;
+  font-size: var(--font-size-xl) !important;
+  color: var(--color-text) !important;
+  text-align: center !important;
+  flex-shrink: 0 !important;
 }
 
 .results-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  flex: 1;
-  align-content: center;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+  gap: 1rem !important;
+  flex: 1 !important;
+  align-content: center !important;
 }
 
 .result-item {
