@@ -1512,7 +1512,7 @@ select.form-control {
   margin: 0 0 2rem 0 !important;
   font-size: var(--font-size-xl) !important;
   color: var(--color-text) !important;
-  text-align: center !important;
+  text-align: left !important;
   flex-shrink: 0 !important;
 }
 
