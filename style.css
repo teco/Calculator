@@ -1537,7 +1537,7 @@ select.form-control {
   border-radius: var(--border-radius-lg) !important;
   padding: 2rem !important;
   box-shadow: var(--shadow-sm) !important;
-  height: 320px !important;
+  height: 360px !important;
   display: flex !important;
   flex-direction: column !important;
 }
@@ -1595,7 +1595,7 @@ select.form-control {
   border-radius: var(--border-radius-lg) !important;
   padding: 2rem !important;
   box-shadow: var(--shadow-sm) !important;
-  height: 320px !important;
+  height: 360px !important;
   display: flex !important;
   flex-direction: column !important;
   overflow-y: auto !important;
