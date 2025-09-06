@@ -1367,11 +1367,21 @@ body {
   width: 100% !important;
 }
 
-/* Segmentation & Activation - Keep as single column for now */
+/* Segmentation & Activation - Two Column Grid */
 #segmentation-sections {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 1rem !important;
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 1.5rem !important;
+}
+
+#segmentation-sections h2 {
+  grid-column: 1 / -1 !important;
+  margin-bottom: 1.5rem !important;
+}
+
+#segmentation-sections .section-card {
+  display: block !important;
+  width: 100% !important;
 }
 
 .optimization-tips {
