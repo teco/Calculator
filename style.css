@@ -1742,7 +1742,7 @@ select.form-control {
 
 /* Header subtitle styling for both pages */
 .header-subtitle {
-  max-width: 450px;
+  max-width: 480px;
   margin: 0 auto;
   text-align: center;
   line-height: var(--line-height-relaxed);
@@ -1750,7 +1750,7 @@ select.form-control {
 
 /* Header title styling */
 .header h1 {
-  max-width: 700px;
+  max-width: 480px;
   margin: 0 auto 1rem auto;
   text-align: center;
   line-height: var(--line-height-tight);
