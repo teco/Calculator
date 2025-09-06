@@ -1508,12 +1508,13 @@ select.form-control {
   flex-direction: column !important;
 }
 
-.dashboard-card h3 {
+#results-dashboard .dashboard-card h3 {
   margin: 0 0 2rem 0 !important;
   font-size: var(--font-size-xl) !important;
   color: var(--color-text) !important;
   text-align: left !important;
   flex-shrink: 0 !important;
+  display: block !important;
 }
 
 .dashboard-card .content-wrapper {
