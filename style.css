@@ -1840,8 +1840,17 @@ select.form-control {
     grid-template-columns: 1fr;
   }
   
+  /* Make calculator sections single-column on mobile */
+  #data-services-sections {
+    grid-template-columns: 1fr !important;
+  }
+  
+  #segmentation-sections {
+    grid-template-columns: 1fr !important;
+  }
+  
   .glossary-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
   
   .glossary-main {

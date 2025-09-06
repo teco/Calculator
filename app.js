@@ -169,7 +169,7 @@ function renderSection(title, items, sectionId) {
           </div>
           <div class="input-group">
             <input type="number" min="0" step="any" id="input-${item.id}"
-              class="form-control" placeholder="Volume (${item.unit.split(' ')[1]})">
+              class="form-control" placeholder="Volume (${item.unit.replace('1', '')})">
             <select id="freq-${item.id}" class="form-control">
               <option value="onetime">One-time</option>
               <option value="daily">Daily</option>
