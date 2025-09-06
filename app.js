@@ -250,7 +250,6 @@ document.addEventListener('DOMContentLoaded', function () {
           <p><strong>Total Annual Credits Used:</strong> ${formatNumber(totalAnnual)}</p>
           <p><strong>Total Monthly Credits Used:</strong> ${formatNumber(totalMonthly)}</p>
           <p><strong>Total Daily Credits Used:</strong> ${formatNumber(totalDaily)}</p>
-          <p><strong>Estimated Annual Cost (USD):</strong> $${formatNumber(totalUSD.toFixed(2))}</p>
         </div>
       </div>
     `;
